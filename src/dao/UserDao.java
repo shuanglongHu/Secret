@@ -24,11 +24,11 @@ public class UserDao {
     }
 
     public User findUser(String username) {
-        String sql = "SELECT username, password from user where username = VALUES(?);";
+        String sql = "SELECT * from user where username = (?);";
         Object[] params = {username};
         User user = null;
         try {
-            user = queryRunner.query(sql, new BeanHandler<>(User.class));
+            user = queryRunner.query(sql, new BeanHandler<>(User.class), params);
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException("查找用户出错！");

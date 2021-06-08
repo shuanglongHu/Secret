@@ -6,6 +6,7 @@ import domain.Secret;
 import domain.User;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -78,7 +79,7 @@ public class MainView {
                     System.out.println("请输入密码");
                     password = scanner.next();
 
-                    if(user2.getPassword() != password) {
+                    if(!user2.getPassword().equals(password)) {
                         System.out.println("您输入的密码错误！");
                         break;
                     } else {
@@ -105,6 +106,15 @@ public class MainView {
                 String outputFilePath = scanner.next();
                 File inputFile = new File(inputFilePath);
                 File outputFile = new File(outputFilePath);
+                if (!outputFile.exists()) {
+                    outputFile.getParentFile().mkdir();
+                    try {
+                        outputFile.createNewFile();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        throw new RuntimeException("创建解密文件路径出错！");
+                    }
+                }
                 if((secretController.desEncryptFile(username, inputFile,outputFile))>0){
                     System.out.println("加密成功");
                 }
@@ -114,26 +124,37 @@ public class MainView {
                 break;
             case 3:
                 List<Secret> list = secretController.showAllSecret(username);
+                if (list.isEmpty()) {
+                    System.out.println("您还没有已加密的文件！");
+                    break;
+                }
                 showALLSecret(username);
                 Scanner scanner1 = new Scanner(System.in);
-                System.out.println("请选择你想要解密的文件序号,序号编号由0开始");
+                System.out.println("请选择你想要解密的文件序号,序号编号由1开始");
                 int index = sc.nextInt();
                 System.out.println("请输入文件解密后的保存路径");
-                String decreyptpath = sc.next();
-                Secret secret = list.get(index);
+                String decryptPath = sc.next();
+                Secret secret = list.get(index - 1);
                 File input = new File(secret.getFilename());
-                File output = new File(decreyptpath);
+                File output = new File(decryptPath);
                 secretController.desDecryptFile(input,output,secret.getSecretKey());
                 break;
             default:
                 System.out.println("选择的功能不存在，请重新输入");
+                break;
         }
     }
 
     private void showALLSecret(String username) {
         List<Secret> list =  secretController.showAllSecret(username);
+        System.out.println("-------------------------------------------");
+        System.out.println("文件列表：");
+        if(list.isEmpty()) {
+            System.out.println("您还没有已加密的文件！");
+        }
         for (Secret s: list){
             System.out.println(s);
         }
+        System.out.println("-------------------------------------------");
     }
 }
