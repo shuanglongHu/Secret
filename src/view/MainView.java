@@ -32,8 +32,13 @@ public class MainView {
             System.out.println();
             System.out.println();
             System.out.println("        1.用户注册                     2.用户登录               ");
-            int choice = scanner.nextInt();
-            switch (choice) {
+            String choice = scanner.next();
+            while(!choice.equals("1") && !choice.equals("2")) {
+                System.out.println("请输入正确选项：1或者2");
+                choice = scanner.next();
+            }
+            Integer i = Integer.valueOf(choice);
+            switch (i) {
                 case 1:
                     System.out.println("请输入注册账号");
                     /**

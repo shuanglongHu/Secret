@@ -23,6 +23,65 @@ public abstract class DESCoder extends Coder {
 
         return secretKey;
     }
+    //加密文件算法
+    public static String encrypt(String key, File inputFile, File outputFile){
+        FileInputStream fileInputStream = null;
+        FileOutputStream fileOutputStream = null;
+        CipherInputStream cipherInputStream = null;
+        String res = null;
+        try {
+            if(inputFile.isDirectory()) {
+                System.out.println("文件输入错误，不能加密文件夹");
+                res = "fail";
+            } else if (inputFile.exists()) {
+                /**
+                 * 读取文件，并分段加密并存储数据
+                 */
+                Key k = toKey(decryptBASE64(key));
+                Cipher cipher = Cipher.getInstance(ALGORITHM);
+                cipher.init(Cipher.ENCRYPT_MODE, k);
+                fileInputStream = new FileInputStream(inputFile);
+                fileOutputStream = new FileOutputStream(outputFile);
+                cipherInputStream = new CipherInputStream(fileInputStream, cipher);
+                byte[] buffer = new byte[1024];
+                int readCount = 0;
+                while((readCount = cipherInputStream.read(buffer)) > 0) {
+                    fileOutputStream.write(buffer, 0, readCount);
+                }
+                res = "success";
+            } else {
+                System.out.println("文件不存在，请重新选择！");
+                res = "fail";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("文件加密出错！");
+        } finally {
+            if (fileInputStream != null) {
+                try {
+                    fileInputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(fileOutputStream != null) {
+                try {
+                    fileOutputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(cipherInputStream != null) {
+                try {
+                    cipherInputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return res;
+    }
+
 
     //解密文件算法
     public static String decrypt(String key, File inputFile, File outputFile){
@@ -83,64 +142,6 @@ public abstract class DESCoder extends Coder {
         return res;
     }
 
-    //加密文件算法
-    public static String encrypt(String key, File inputFile, File outputFile){
-        FileInputStream fileInputStream = null;
-        FileOutputStream fileOutputStream = null;
-        CipherInputStream cipherInputStream = null;
-        String res = null;
-        try {
-            if(inputFile.isDirectory()) {
-                System.out.println("文件输入错误，不能加密文件夹");
-                res = "fail";
-            } else if (inputFile.exists()) {
-                /**
-                 * 读取文件，并分段加密并存储数据
-                 */
-                Key k = toKey(decryptBASE64(key));
-                Cipher cipher = Cipher.getInstance(ALGORITHM);
-                cipher.init(Cipher.ENCRYPT_MODE, k);
-                fileInputStream = new FileInputStream(inputFile);
-                fileOutputStream = new FileOutputStream(outputFile);
-                cipherInputStream = new CipherInputStream(fileInputStream, cipher);
-                byte[] buffer = new byte[1024];
-                int readCount = 0;
-                while((readCount = fileInputStream.read(buffer)) > 0) {
-                    fileOutputStream.write(buffer, 0, readCount);
-                }
-                res = "success";
-            } else {
-                System.out.println("文件不存在，请重新选择！");
-                res = "fail";
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("文件加密出错！");
-        } finally {
-            if (fileInputStream != null) {
-                try {
-                    fileInputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if(fileOutputStream != null) {
-                try {
-                    fileOutputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if(cipherInputStream != null) {
-                try {
-                    cipherInputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return res;
-    }
 
 
     public static String initKey() throws  Exception{
